@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="theme-color" content="#0d1b2a" />
+  <title>Big Beautiful DC</title>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <link rel="stylesheet" href="style.css" />
+  <script src="data.js"></script>
+</head>
+<body>
+
+  <header>
+    <div class="header-flag">🇺🇸</div>
+    <div class="header-text">
+      <h1>Big Beautiful DC</h1>
+      <p>Fountains &amp; memorials cleaned up &amp; restored</p>
+    </div>
+  </header>
+
+  <div id="map"></div>
+
+  <script>
+    const map = L.map('map', {
+      center: [38.892, -77.036],
+      zoom: 13,
+      zoomControl: true
+    });
+
+    // Free OpenStreetMap tiles — no API key needed
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    function makeIcon(type) {
+      return L.divIcon({
+        className: '',
+        html: `<div class="marker-icon ${type}"><div class="marker-icon-inner">${type === 'fountain' ? '💧' : '⭐'}</div></div>`,
+        iconSize: [28, 28],
+        iconAnchor: [14, 28],
+        popupAnchor: [0, -30]
+      });
+    }
+
+    locations.forEach(loc => {
+      const marker = L.marker([loc.lat, loc.lng], { icon: makeIcon(loc.type) });
+
+      const popup = L.popup({ maxWidth: 300, minWidth: 220 }).setContent(`
+        <div>
+          <div class="popup-badges">
+            <span class="popup-type ${loc.type}">${loc.type}</span>
+            <span class="popup-restoration restoration-${loc.restorationType.toLowerCase().replace(/[^a-z]+/g, '-')}">${loc.restorationType}</span>
+          </div>
+          <div class="popup-name">${loc.name}</div>
+          <div class="popup-desc">${loc.restorationNote}</div>
+        </div>
+      `);
+
+      marker.bindPopup(popup);
+      marker.addTo(map);
+    });
+
+    // Legend
+    const legend = L.control({ position: 'bottomleft' });
+    legend.onAdd = () => {
+      const div = L.DomUtil.create('div', 'legend');
+      div.innerHTML = `
+        <div class="legend-title">Type</div>
+        <div class="legend-item"><div class="legend-dot fountain"></div> Fountain</div>
+        <div class="legend-item"><div class="legend-dot memorial"></div> Memorial</div>
+        <div class="legend-divider"></div>
+        <div class="legend-title">Restoration</div>
+        <div class="legend-item"><div class="legend-badge rehab"></div> Full Rehab</div>
+        <div class="legend-item"><div class="legend-badge upgrade"></div> Upgrades</div>
+        <div class="legend-item"><div class="legend-badge resurface"></div> Resurfacing</div>
+      `;
+      return div;
+    };
+    legend.addTo(map);
+  </script>
+
+</body>
+</html>
