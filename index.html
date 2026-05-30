@@ -26,7 +26,7 @@
   <div id="map"></div>
 
   <script>
-    const map = L.map('map', {
+    var map = L.map('map', {
       center: [38.892, -77.036],
       zoom: 13,
       zoomControl: true
@@ -58,6 +58,7 @@
             <span class="popup-restoration restoration-${loc.restorationType.toLowerCase().replace(/[^a-z]+/g, '-')}">${loc.restorationType}</span>
           </div>
           <div class="popup-name">${loc.name}</div>
+          <div class="popup-location">📍 ${loc.location}</div>
           <div class="popup-desc">${loc.restorationNote}</div>
         </div>
       `);
