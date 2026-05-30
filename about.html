@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0d1b2a" />
+  <title>About — Big Beautiful DC</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      overflow: auto;
+      padding-bottom: 48px;
+    }
+
+    .about-wrap {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: calc(var(--header-height) + 28px) 20px 0;
+    }
+
+    .about-wrap h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 28px 0 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .about-wrap h2:first-child {
+      margin-top: 0;
+    }
+
+    .about-wrap p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+
+    .about-wrap a {
+      color: #7ab3f0;
+      text-decoration: none;
+      word-break: break-all;
+    }
+
+    .about-wrap a:hover {
+      text-decoration: underline;
+    }
+
+    .source-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .source-list li {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+
+    .source-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .source-org {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .source-url {
+      font-size: 12px;
+    }
+
+    .restoration-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+
+    .restoration-table th {
+      text-align: left;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-muted);
+      padding: 6px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .restoration-table td {
+      padding: 8px 10px;
+      color: var(--text-muted);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      vertical-align: top;
+    }
+
+    .restoration-table td:first-child {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .badge-inline {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .badge-rehab {
+      background: rgba(46,160,67,0.2);
+      color: #7fda9a;
+      border: 1px solid rgba(46,160,67,0.5);
+    }
+
+    .badge-upgrade {
+      background: rgba(200,150,12,0.2);
+      color: #f0c040;
+      border: 1px solid rgba(200,150,12,0.4);
+    }
+
+    .badge-resurface {
+      background: rgba(26,86,160,0.3);
+      color: #7ab3f0;
+      border: 1px solid rgba(26,86,160,0.6);
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #7ab3f0;
+      text-decoration: none;
+      margin-top: 4px;
+    }
+
+    .back-btn:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-flag">🇺🇸</div>
+    <div class="header-text">
+      <h1>Big Beautiful DC</h1>
+      <p>Many people are saying the fountains and memorials are perfect.</p>
+    </div>
+  </header>
+
+  <div class="about-wrap">
+
+    <a class="back-btn" href="index.html">← Back to map</a>
+
+    <h2>About this map</h2>
+    <p>
+      This map tracks fountains and memorials in Washington, D.C. that are being restored, rehabilitated, or upgraded as part of the federal beautification initiative ahead of America's 250th anniversary in 2026.
+    </p>
+    <p>
+      Every location on this map is sourced directly from official government records. No location is included unless it appears in an NPS press release or a separately documented federal project.
+    </p>
+
+    <h2>Primary source</h2>
+    <ul class="source-list">
+      <li>
+        <span class="source-title">National Park Service: DC Beautification — Fountain and Memorial Restoration</span>
+        <span class="source-org">U.S. National Park Service · January 2026</span>
+        <a class="source-url" href="https://www.nps.gov/orgs/1207/dc-beautifcation-january-2026.htm" target="_blank" rel="noopener">
+          nps.gov/orgs/1207/dc-beautifcation-january-2026.htm
+        </a>
+      </li>
+    </ul>
+
+    <h2>Additional sources</h2>
+    <ul class="source-list">
+      <li>
+        <span class="source-title">Reflecting Pool Gets a Deep Clean in Preparation for America 250</span>
+        <span class="source-org">WTOP News · April 2026</span>
+        <a class="source-url" href="https://wtop.com/dc/2026/04/reflecting-pool-gets-a-deep-clean-in-preparation-for-america-250/" target="_blank" rel="noopener">
+          wtop.com/dc/2026/04/reflecting-pool-gets-a-deep-clean…
+        </a>
+      </li>
+      <li>
+        <span class="source-title">Trump's "American Flag Blue" Reflecting Pool Project</span>
+        <span class="source-org">NPR · April 2026</span>
+        <a class="source-url" href="https://www.npr.org/2026/04/28/nx-s1-5802343/reflecting-pool-resurfacing-blue-trump" target="_blank" rel="noopener">
+          npr.org/2026/04/28/nx-s1-5802343/reflecting-pool-resurfacing-blue-trump
+        </a>
+      </li>
+      <li>
+        <span class="source-title">Fountain Flows Again at Meridian Hill Park After 7 Years</span>
+        <span class="source-org">Washington Times · May 2026</span>
+        <a class="source-url" href="https://www.washingtontimes.com/news/2026/may/16/fountain-flows-dcs-meridian-hill-park-idling-7-years/" target="_blank" rel="noopener">
+          washingtontimes.com/news/2026/may/16/fountain-flows-dcs-meridian-hill-park…
+        </a>
+      </li>
+      <li>
+        <span class="source-title">Fountains at Lafayette Park Return as Restoration Continues</span>
+        <span class="source-org">DC News Now · 2026</span>
+        <a class="source-url" href="https://www.dcnewsnow.com/news/local-news/washington-dc/fountains-at-lafayette-park-return-as-restoration-work-continues-across-dc/" target="_blank" rel="noopener">
+          dcnewsnow.com/news/local-news/washington-dc/fountains-at-lafayette-park…
+        </a>
+      </li>
+      <li>
+        <span class="source-title">Trump Celebrates DC Beautification: Reflecting Pool &amp; Lafayette Park</span>
+        <span class="source-org">Washington Examiner · May 2026</span>
+        <a class="source-url" href="https://www.washingtonexaminer.com/news/white-house/4542821/trump-celebrates-success-dc-beautification-reflecting-pool-lafayette-park/" target="_blank" rel="noopener">
+          washingtonexaminer.com/news/white-house/4542821/trump-celebrates-success…
+        </a>
+      </li>
+    </ul>
+
+    <h2>All 19 locations</h2>
+    <table class="restoration-table">
+      <thead>
+        <tr>
+          <th>Location</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Meridian Hill Park Cascading Fountain</td><td><span class="badge-inline badge-rehab">Full Rehabilitation</span></td></tr>
+        <tr><td>Lafayette Square Fountains</td><td><span class="badge-inline badge-rehab">Full Rehabilitation</span></td></tr>
+        <tr><td>Columbus Plaza Fountain</td><td><span class="badge-inline badge-rehab">Full Rehabilitation</span></td></tr>
+        <tr><td>Freedom Plaza Fountain</td><td><span class="badge-inline badge-rehab">Full Rehabilitation</span></td></tr>
+        <tr><td>John Marshall Park Fountain</td><td><span class="badge-inline badge-rehab">Full Rehabilitation</span></td></tr>
+        <tr><td>John Paul Jones Memorial</td><td><span class="badge-inline badge-rehab">Full Rehabilitation</span></td></tr>
+        <tr><td>Philip Sheridan Memorial</td><td><span class="badge-inline badge-rehab">Full Rehabilitation</span></td></tr>
+        <tr><td>Rawlins Park Fountain</td><td><span class="badge-inline badge-rehab">Full Rehabilitation</span></td></tr>
+        <tr><td>Simón Bolívar Memorial</td><td><span class="badge-inline badge-rehab">Full Rehabilitation</span></td></tr>
+        <tr><td>Dupont Circle Fountain</td><td><span class="badge-inline badge-upgrade">Maintenance &amp; Upgrades</span></td></tr>
+        <tr><td>Franklin Delano Roosevelt Memorial</td><td><span class="badge-inline badge-upgrade">Maintenance &amp; Upgrades</span></td></tr>
+        <tr><td>George Mason Memorial</td><td><span class="badge-inline badge-upgrade">Maintenance &amp; Upgrades</span></td></tr>
+        <tr><td>Japanese American Memorial</td><td><span class="badge-inline badge-upgrade">Maintenance &amp; Upgrades</span></td></tr>
+        <tr><td>Korean War Veterans Memorial</td><td><span class="badge-inline badge-upgrade">Maintenance &amp; Upgrades</span></td></tr>
+        <tr><td>National Law Enforcement Officers Memorial</td><td><span class="badge-inline badge-upgrade">Maintenance &amp; Upgrades</span></td></tr>
+        <tr><td>Taras Shevchenko Memorial</td><td><span class="badge-inline badge-upgrade">Maintenance &amp; Upgrades</span></td></tr>
+        <tr><td>United States Navy Memorial</td><td><span class="badge-inline badge-upgrade">Maintenance &amp; Upgrades</span></td></tr>
+        <tr><td>World War II Memorial</td><td><span class="badge-inline badge-upgrade">Maintenance &amp; Upgrades</span></td></tr>
+        <tr><td>Lincoln Memorial Reflecting Pool</td><td><span class="badge-inline badge-resurface">Major Resurfacing</span></td></tr>
+      </tbody>
+    </table>
+
+  </div>
+
+</body>
+</html>
