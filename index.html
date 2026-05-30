@@ -11,7 +11,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <link rel="stylesheet" href="style.css" />
-  <script src="data.js"></script>
+  <script src="data.js?v=2"></script>
 </head>
 <body>
 
@@ -21,27 +21,98 @@
       <h1>Big Beautiful DC</h1>
       <p>Many people are saying the fountains and memorials are perfect.</p>
     </div>
+    <button id="tour-toggle" class="tour-toggle-btn" onclick="toggleTour()">🗺 Tour</button>
   </header>
 
   <div id="map"></div>
 
+  <div id="tour-tip" class="tour-tip" style="display:none">
+    <div class="tour-tip-arrow"></div>
+    <div class="tour-tip-body">
+      <span>✨ Tap here for a guided tour of all 19 stops</span>
+      <button class="tour-tip-close" onclick="dismissTip()">✕</button>
+    </div>
+  </div>
+
+  <!-- Tour panel (hidden until activated) -->
+  <div id="tour-panel" class="tour-panel" style="display:none">
+    <div class="tour-filters" id="tour-filters"></div>
+    <div class="tour-card" id="tour-card"></div>
+    <div class="tour-nav">
+      <button class="tour-arrow" id="tour-prev" onclick="stepTour(-1)">←</button>
+      <span class="tour-step-label" id="tour-step-label"></span>
+      <button class="tour-order-btn" id="tour-order" onclick="toggleReverse()">
+        <span class="reverse-label">Order</span>
+        <span id="tour-order-dir">↓ South→North</span>
+      </button>
+      <button class="tour-nav-btn" id="tour-navigate" onclick="openNavigation()">🧭 Nav</button>
+      <button class="tour-arrow" id="tour-next" onclick="stepTour(1)">→</button>
+    </div>
+  </div>
+
   <script>
+    // ── Tour order (S → N) ──────────────────────────────────────────────────
+    const TOUR_ORDER = [
+      "George Mason Memorial",
+      "Franklin Delano Roosevelt Memorial",
+      "Korean War Veterans Memorial",
+      "Lincoln Memorial Reflecting Pool",
+      "World War II Memorial",
+      "John Paul Jones Memorial",
+      "Simón Bolívar Memorial",
+      "Rawlins Park Fountain",
+      "Lafayette Square Fountains",
+      "Freedom Plaza Fountain",
+      "United States Navy Memorial",
+      "John Marshall Park Fountain",
+      "National Law Enforcement Officers Memorial",
+      "Japanese American Memorial",
+      "Columbus Plaza Fountain",
+      "Dupont Circle Fountain",
+      "Taras Shevchenko Memorial",
+      "Philip Sheridan Memorial",
+      "Meridian Hill Park Cascading Fountain",
+    ];
+
+    // ── Cookie helpers ──────────────────────────────────────────────────────
+    function setCookie(name, val) {
+      document.cookie = `${name}=${encodeURIComponent(val)};path=/;max-age=2592000`;
+    }
+    function getCookie(name) {
+      const entry = document.cookie.split(';').map(c => c.trim())
+        .find(c => c.startsWith(name + '='));
+      return entry ? decodeURIComponent(entry.split('=')[1]) : null;
+    }
+
+    // ── State ───────────────────────────────────────────────────────────────
+    let tourActive  = false;
+    let tourStep    = 0;
+    let tourFilter  = '';
+    let tourReverse = false;
+    let tourLine    = null;
+    const markerMap = {}; // name → { marker, iconEl }
+
+    // ── Map setup ───────────────────────────────────────────────────────────
     var map = L.map('map', {
       center: [38.892, -77.036],
       zoom: 13,
       zoomControl: true
     });
 
-    // Free OpenStreetMap tiles — no API key needed
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    function makeIcon(type) {
+    // ── Markers ─────────────────────────────────────────────────────────────
+    function makeIconHtml(type, active) {
+      return `<div class="marker-icon ${type}${active ? ' marker-icon--active' : ''}"><div class="marker-icon-inner">${type === 'fountain' ? '💧' : '⭐'}</div></div>`;
+    }
+
+    function makeIcon(type, active) {
       return L.divIcon({
         className: '',
-        html: `<div class="marker-icon ${type}"><div class="marker-icon-inner">${type === 'fountain' ? '💧' : '⭐'}</div></div>`,
+        html: makeIconHtml(type, active),
         iconSize: [28, 28],
         iconAnchor: [14, 28],
         popupAnchor: [0, -30]
@@ -49,7 +120,7 @@
     }
 
     locations.forEach(loc => {
-      const marker = L.marker([loc.lat, loc.lng], { icon: makeIcon(loc.type) });
+      const marker = L.marker([loc.lat, loc.lng], { icon: makeIcon(loc.type, false) });
 
       const popup = L.popup({ maxWidth: 300, minWidth: 220 }).setContent(`
         <div>
@@ -58,16 +129,17 @@
             <span class="popup-restoration restoration-${loc.restorationType.toLowerCase().replace(/[^a-z]+/g, '-')}">${loc.restorationType}</span>
           </div>
           <div class="popup-name">${loc.name}</div>
-          <div class="popup-location">📍 ${loc.location}</div>
+          <a class="popup-location popup-location--nav" href="${navUrl(loc.lat, loc.lng)}" target="_blank" rel="noopener">📍 ${loc.location} <span class="popup-nav-hint">↗ Navigate</span></a>
           <div class="popup-desc">${loc.restorationNote}</div>
         </div>
       `);
 
       marker.bindPopup(popup);
       marker.addTo(map);
+      markerMap[loc.name] = marker;
     });
 
-    // Legend
+    // ── Legend ──────────────────────────────────────────────────────────────
     const legend = L.control({ position: 'bottomleft' });
     legend.onAdd = () => {
       const div = L.DomUtil.create('div', 'legend');
@@ -85,6 +157,257 @@
       return div;
     };
     legend.addTo(map);
+
+    // ── Tour logic ───────────────────────────────────────────────────────────
+
+    const tourLocations = TOUR_ORDER.map(name => locations.find(l => l.name === name)).filter(Boolean);
+
+    function getFilteredTour() {
+      let list = tourFilter
+        ? tourLocations.filter(l => l.restorationType === tourFilter)
+        : tourLocations.slice();
+      return tourReverse ? list.slice().reverse() : list;
+    }
+
+    function toggleTour() {
+      dismissTip();
+      tourActive ? exitTour() : enterTour(true);
+    }
+
+    function enterTour(animate) {
+      tourActive = true;
+      document.getElementById('tour-toggle').textContent = '✕ Exit Tour';
+      document.getElementById('tour-panel').style.display = 'flex';
+      updateOrderBtn();
+      setMapBottom(true);
+      renderFilters();
+      const list = getFilteredTour();
+      tourStep = Math.min(tourStep, Math.max(0, list.length - 1));
+      renderCard();
+      const loc = list[tourStep];
+      if (loc) {
+        if (animate) map.flyTo([loc.lat, loc.lng], 15, { duration: 0.8 });
+        else map.setView([loc.lat, loc.lng], 15);
+      }
+      updateActiveMaker();
+      drawLine();
+      setCookie('tourActive', '1');
+      setCookie('tourStep', tourStep);
+      setCookie('tourFilter', tourFilter);
+      setCookie('tourReverse', tourReverse ? '1' : '0');
+    }
+
+    function exitTour() {
+      tourActive = false;
+      document.getElementById('tour-toggle').textContent = '🗺 Tour';
+      document.getElementById('tour-panel').style.display = 'none';
+      setMapBottom(false);
+      clearActiveMaker();
+      removeLine();
+      map.flyTo([38.892, -77.036], 13, { duration: 0.8 });
+      setCookie('tourActive', '0');
+    }
+
+    function updateOrderBtn() {
+      document.getElementById('tour-order-dir').textContent = tourReverse ? '↑ North→South' : '↓ South→North';
+      document.getElementById('tour-order').classList.toggle('active', tourReverse);
+    }
+
+    function setMapBottom(tourOpen) {
+      const panel = document.getElementById('tour-panel');
+      const h = tourOpen ? panel.offsetHeight : 0;
+      document.getElementById('map').style.bottom = h + 'px';
+      map.invalidateSize();
+      // Defer legend lift until after the panel has fully painted
+      requestAnimationFrame(() => {
+        const actualH = tourOpen ? panel.offsetHeight : 0;
+        const legend = document.querySelector('.leaflet-bottom.leaflet-left');
+        if (legend) legend.style.bottom = (actualH + 12) + 'px';
+      });
+    }
+
+    function stepTour(dir) {
+      const list = getFilteredTour();
+      const next = tourStep + dir;
+      if (next < 0 || next >= list.length) return;
+      tourStep = next;
+      setCookie('tourStep', tourStep);
+      renderCard();
+      const loc = list[tourStep];
+      map.flyTo([loc.lat, loc.lng], 15, { duration: 0.6 });
+      updateActiveMaker();
+      drawLine();
+    }
+
+    function setFilter(f) {
+      tourFilter = f;
+      tourStep = 0;
+      setCookie('tourFilter', f);
+      setCookie('tourStep', 0);
+      renderFilters();
+      renderCard();
+      const list = getFilteredTour();
+      if (list[0]) map.flyTo([list[0].lat, list[0].lng], 15, { duration: 0.6 });
+      updateActiveMaker();
+      drawLine();
+    }
+
+    function toggleReverse() {
+      tourReverse = !tourReverse;
+      tourStep = 0;
+      setCookie('tourReverse', tourReverse ? '1' : '0');
+      setCookie('tourStep', 0);
+      updateOrderBtn();
+      renderFilters();
+      renderCard();
+      const list = getFilteredTour();
+      if (list[0]) map.flyTo([list[0].lat, list[0].lng], 15, { duration: 0.6 });
+      updateActiveMaker();
+      drawLine();
+    }
+
+    function renderFilters() {
+      const filters = [
+        { label: 'All',        value: '' },
+        { label: 'Full Rehab', value: 'Full Rehabilitation' },
+        { label: 'Upgrades',   value: 'Maintenance & Upgrades' },
+        { label: 'Resurfacing',value: 'Major Resurfacing' },
+      ];
+      const html = filters.map(f =>
+        `<button class="filter-chip${tourFilter === f.value ? ' active' : ''}" onclick="setFilter('${f.value}')">${f.label}</button>`
+      ).join('') +
+        ``;
+      document.getElementById('tour-filters').innerHTML = html;
+    }
+
+    function renderCard() {
+      const list = getFilteredTour();
+      const loc = list[tourStep];
+      const card = document.getElementById('tour-card');
+      const label = document.getElementById('tour-step-label');
+
+      if (!loc) {
+        card.innerHTML = '<div class="tour-card-empty">No stops match this filter.</div>';
+        label.textContent = '0 of 0';
+        document.getElementById('tour-navigate').style.display = 'none';
+        return;
+      }
+
+      document.getElementById('tour-navigate').style.display = '';
+      const restoClass = loc.restorationType.toLowerCase().replace(/[^a-z]+/g, '-');
+      card.innerHTML = `
+        <div class="popup-badges">
+          <span class="popup-type ${loc.type}">${loc.type}</span>
+          <span class="popup-restoration restoration-${restoClass}">${loc.restorationType}</span>
+        </div>
+        <div class="popup-name">${loc.name}</div>
+        <a class="popup-location popup-location--nav" href="${navUrl(loc.lat, loc.lng)}" target="_blank" rel="noopener">📍 ${loc.location} <span class="popup-nav-hint">↗ Navigate</span></a>
+        <div class="popup-desc">${loc.restorationNote}</div>
+      `;
+      label.textContent = `${tourStep + 1} of ${list.length}`;
+
+      document.getElementById('tour-prev').disabled = tourStep === 0;
+      document.getElementById('tour-next').disabled = tourStep === list.length - 1;
+    }
+
+    function updateActiveMaker() {
+      const list = getFilteredTour();
+      // Reset all markers
+      locations.forEach(loc => {
+        const m = markerMap[loc.name];
+        if (m) m.setIcon(makeIcon(loc.type, false));
+      });
+      // Highlight active
+      const loc = list[tourStep];
+      if (loc && markerMap[loc.name]) {
+        markerMap[loc.name].setIcon(makeIcon(loc.type, true));
+      }
+    }
+
+    function clearActiveMaker() {
+      locations.forEach(loc => {
+        const m = markerMap[loc.name];
+        if (m) m.setIcon(makeIcon(loc.type, false));
+      });
+    }
+
+    function drawLine() {
+      removeLine();
+      const list = getFilteredTour();
+      const cur = list[tourStep];
+      const nxt = list[tourStep + 1];
+      if (cur && nxt) {
+        tourLine = L.polyline(
+          [[cur.lat, cur.lng], [nxt.lat, nxt.lng]],
+          { color: '#ffffff', weight: 2, dashArray: '8 6', opacity: 0.6 }
+        ).addTo(map);
+      }
+    }
+
+    function removeLine() {
+      if (tourLine) { tourLine.remove(); tourLine = null; }
+    }
+
+    function navUrl(lat, lng) {
+      const isApple = /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent);
+      return isApple
+        ? `https://maps.apple.com/?daddr=${lat},${lng}`
+        : `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    }
+
+    function openNavigation() {
+      const loc = getFilteredTour()[tourStep];
+      if (loc) window.open(navUrl(loc.lat, loc.lng), '_blank');
+    }
+
+    // ── Swipe handling ───────────────────────────────────────────────────────
+    (function() {
+      const panel = document.getElementById('tour-panel');
+      let startX = 0, startY = 0;
+      panel.addEventListener('touchstart', e => {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+      }, { passive: true });
+      panel.addEventListener('touchend', e => {
+        const dx = e.changedTouches[0].clientX - startX;
+        const dy = e.changedTouches[0].clientY - startY;
+        if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+          stepTour(dx < 0 ? 1 : -1);
+        }
+      }, { passive: true });
+    })();
+
+    // ── Tour tip ─────────────────────────────────────────────────────────────
+    function dismissTip() {
+      const tip = document.getElementById('tour-tip');
+      tip.classList.add('tour-tip--hiding');
+      setTimeout(() => tip.style.display = 'none', 300);
+      setCookie('tourTipSeen', '1');
+    }
+
+    // ── Restore from cookie on load ──────────────────────────────────────────
+    (function() {
+      const wasActive = getCookie('tourActive') === '1';
+      if (!wasActive) return;
+      const savedStep    = parseInt(getCookie('tourStep') || '0', 10);
+      const savedFilter  = getCookie('tourFilter') || '';
+      const savedReverse = getCookie('tourReverse') === '1';
+      tourStep    = isNaN(savedStep) ? 0 : savedStep;
+      tourFilter  = savedFilter;
+      tourReverse = savedReverse;
+      enterTour(false);
+    })();
+
+    // Resize map bottom when panel height settles after fonts load
+    window.addEventListener('load', () => {
+      if (tourActive) setMapBottom(true);
+      // Show first-load tip if not seen and not already in tour
+      if (!tourActive && !getCookie('tourTipSeen')) {
+        setTimeout(() => {
+          document.getElementById('tour-tip').style.display = 'flex';
+        }, 1200);
+      }
+    });
   </script>
 
 </body>

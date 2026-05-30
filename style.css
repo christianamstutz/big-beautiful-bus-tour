@@ -229,6 +229,19 @@ header {
   margin-bottom: 8px;
   padding-bottom: 8px;
   border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: block;
+  text-decoration: none;
+}
+
+.popup-location--nav:hover {
+  color: #7ab3f0;
+}
+
+.popup-nav-hint {
+  font-size: 10px;
+  color: #7ab3f0;
+  margin-left: 4px;
+  opacity: 0.8;
 }
 
 .popup-desc {
@@ -258,6 +271,256 @@ header {
   justify-content: center;
   transform: rotate(45deg);
   font-size: 13px;
+}
+
+/* ── First-load tour tip ───────────────────────────────────────────────── */
+.tour-tip {
+  position: fixed;
+  top: calc(var(--header-height) + 8px);
+  right: 12px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  animation: tip-fade-in 0.3s ease;
+  pointer-events: auto;
+}
+
+.tour-tip--hiding {
+  animation: tip-fade-out 0.3s ease forwards;
+}
+
+@keyframes tip-fade-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes tip-fade-out {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-6px); }
+}
+
+.tour-tip-arrow {
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid var(--red);
+  margin-right: 18px;
+}
+
+.tour-tip-body {
+  background: var(--red);
+  color: #fff;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  max-width: 240px;
+  line-height: 1.4;
+}
+
+.tour-tip-close {
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: #fff;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tour-tip-close:hover {
+  background: rgba(255,255,255,0.35);
+}
+
+/* ── Tour toggle button ────────────────────────────────────────────────── */
+.tour-toggle-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+  background: var(--red);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tour-toggle-btn:hover {
+  background: #cc2233;
+}
+
+/* ── Tour panel ────────────────────────────────────────────────────────── */
+.tour-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1100;
+  background: var(--bg);
+  border-top: 2px solid var(--red);
+  display: flex;
+  flex-direction: column;
+  max-height: 60vh;
+}
+
+/* Filter row */
+.tour-filters {
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px 6px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.tour-filters::-webkit-scrollbar { display: none; }
+
+.filter-chip {
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.07);
+  color: var(--text-muted);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.filter-chip.active {
+  background: var(--red);
+  color: #fff;
+  border-color: var(--red);
+}
+.filter-chip:hover:not(.active) {
+  background: rgba(255,255,255,0.12);
+}
+.tour-order-btn {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  background: rgba(255,255,255,0.07);
+  color: var(--text-muted);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  padding: 4px 10px;
+  cursor: pointer;
+  line-height: 1.2;
+  font-size: 12px;
+  font-weight: 600;
+}
+.tour-order-btn.active {
+  background: var(--red);
+  color: #fff;
+  border-color: var(--red);
+}
+.tour-order-btn:hover:not(.active) {
+  background: rgba(255,255,255,0.12);
+}
+
+.reverse-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+/* Card */
+.tour-card {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 12px 16px 8px;
+}
+
+.tour-card-empty {
+  color: var(--text-muted);
+  font-size: 14px;
+  text-align: center;
+  padding: 16px 0;
+}
+
+/* Nav row */
+.tour-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px 12px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+
+.tour-arrow {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.07);
+  color: var(--text);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.tour-arrow:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+.tour-arrow:not(:disabled):hover {
+  background: rgba(255,255,255,0.15);
+}
+
+.tour-step-label {
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.tour-nav-btn {
+  flex-shrink: 0;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tour-nav-btn:hover {
+  background: #1e63b8;
+}
+
+/* Active marker highlight */
+.marker-icon--active {
+  box-shadow: 0 0 0 3px #fff, 0 0 12px rgba(255,255,255,0.6);
+  animation: pulse-ring 1.5s ease-out infinite;
+}
+
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 3px #fff, 0 0 0 6px rgba(255,255,255,0.4); }
+  70%  { box-shadow: 0 0 0 3px #fff, 0 0 0 12px rgba(255,255,255,0); }
+  100% { box-shadow: 0 0 0 3px #fff, 0 0 0 12px rgba(255,255,255,0); }
 }
 
 /* Leaflet attribution tweak */
